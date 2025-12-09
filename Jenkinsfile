@@ -6,10 +6,10 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_USER      = "nightcoresifo2841"      // Docker Hub username
-        IMAGE_NAME          = "devopspipeline"         // Docker Hub repository name
-        TAG                 = "latest"                 // Docker tag
-        DOCKER_CREDENTIALS  = "dockerhub-token"        // Jenkins Secret Text credential ID
+        DOCKERHUB_USER      = "nightcoresifo2841"
+        IMAGE_NAME          = "devopspipeline"
+        TAG                 = "latest"
+        DOCKER_CREDENTIALS  = "dockerhub-token"
     }
 
     stages {
@@ -32,7 +32,7 @@ pipeline {
                 sh '''
                     echo "Building Docker image..."
                     docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${TAG} \
-                    -f docker/Dockerfile .
+                    -f Dockerfile .
                 '''
             }
         }
