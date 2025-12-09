@@ -1,8 +1,8 @@
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
-# Copy the built JAR from Maven (target/)
+# Copy the built JAR
 COPY target/*.jar app.jar
 
 EXPOSE 8080
