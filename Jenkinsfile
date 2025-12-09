@@ -9,7 +9,7 @@ pipeline {
         DOCKERHUB_USER = "nightcoresifo2841"              // your DockerHub username
         IMAGE_NAME     = "devopspipeline"                 // your repo name
         TAG            = "latest"                         
-        DOCKER_CREDENTIALS = "dockerhub-creds"            // Jenkins credentials ID
+        DOCKER_CREDENTIALS = "dockerhub-token"            // Jenkins credentials ID
     }
 
     stages {
