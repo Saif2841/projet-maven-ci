@@ -1,52 +1,59 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKERHUB_USER = 'nightcoresifo2841'    // <-- your Docker Hub username
-        IMAGE_NAME     = 'projet-maven-ci'      // image name
+    tools { 
+        maven 'M2_HOME'
     }
 
-    // For now: poll SCM every minute (easy to test)
-    triggers {
-        pollSCM('* * * * *')   // every minute
-        // When your webhook is OK, you can remove this and use "GitHub hook trigger" in the job config.
+    environment {
+        DOCKERHUB_USER = "nightcoresifo2841"              // your DockerHub username
+        IMAGE_NAME     = "devopspipeline"                 // your repo name
+        TAG            = "latest"                         
+        DOCKER_CREDENTIALS = "dockerhub-creds"            // Jenkins credentials ID
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Git') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Saif2841/projet-maven-ci.git'
+                git branch: 'main', url: 'https://github.com/Rahmed999/Devops.git'
             }
         }
 
-        stage('Build Maven') {
+        stage('Build with Maven') {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Build Docker image') {
+        stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker build \
-                      -t "$DOCKERHUB_USER/$IMAGE_NAME:$BUILD_NUMBER" \
-                      .
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${TAG} \
+                    -f docker/Dockerfile .
                 '''
             }
         }
 
-        stage('Push Docker image') {
+        stage('Push Docker Image') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_TOKEN')]) {
-                    sh '''
-                        echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
-                        docker push "$DOCKERHUB_USER/$IMAGE_NAME:$BUILD_NUMBER"
-                        docker tag "$DOCKERHUB_USER/$IMAGE_NAME:$BUILD_NUMBER" "$DOCKERHUB_USER/$IMAGE_NAME:latest"
-                        docker push "$DOCKERHUB_USER/$IMAGE_NAME:latest"
-                    '''
+                withCredentials([usernamePassword(
+                    credentialsId: DOCKER_CREDENTIALS,
+                    passwordVariable: 'DOCKER_PASS',
+                    usernameVariable: 'DOCKER_USER'
+                )]) {
+                    script {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${TAG}
+                        '''
+                    }
                 }
             }
         }
+    }
+
+    post {
+        success { echo 'Pipeline completed successfully!' }
+        failure { echo 'Pipeline failed. Check the logs!' }
     }
 }
