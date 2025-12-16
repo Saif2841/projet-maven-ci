@@ -27,6 +27,19 @@ pipeline {
             }
         }
 
+        // 🔍 SONARQUBE ANALYSIS STAGE
+        stage('MVN SONARQUBE') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                      mvn sonar:sonar \
+                        -Dsonar.projectKey=jenkins-sonarCube \
+                        -Dsonar.projectName=jenkins-sonarCube
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh '''
